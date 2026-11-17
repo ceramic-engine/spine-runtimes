@@ -395,7 +395,7 @@ class SkeletonBinary {
 					if ((flags & 32) != 0)
 						data.shearX = input.readFloat();
 					data.limit = ((flags & 64) != 0 ? input.readFloat() : 5000) * scale;
-					data.step = .1 / input.readUnsignedByte();
+					data.step = 1 / input.readUnsignedByte();
 					var setup = data.setupPose;
 					setup.inertia = input.readFloat();
 					setup.strength = input.readFloat();
