@@ -63,6 +63,10 @@ class Skeleton {
 	/** The list of bones and constraints, sorted in the order they should be updated, as computed by Skeleton.updateCache(). */
 	public final _updateCache = new Array<Dynamic>();
 
+	/** Typed copy of _updateCache, built by updateCache(), so that updates are not called dynamically every frame
+	 * (on static targets, calling a method on a Dynamic value looks it up by name and allocates a closure). */
+	private final updateList = new Array<Update>();
+
 	private final resetCache = new Array<Posed<Dynamic, Dynamic>>();
 
 	/** The skeleton's current skin. */
@@ -197,6 +201,12 @@ class Skeleton {
 				updateCache[i] = b.appliedPose;
 			}
 		}
+
+		updateList.resize(n);
+		for (i in 0...n) {
+			var updatable:Update = updateCache[i];
+			updateList[i] = updatable;
+		}
 	}
 
 	private static function contains(list:Array<ConstraintData<Dynamic, Dynamic>>, element:Dynamic):Bool {
@@ -242,7 +252,7 @@ class Skeleton {
 		for (resetable in resetCache)
 			resetable.resetConstrained();
 
-		for (updatable in _updateCache)
+		for (updatable in updateList)
 			updatable.update(this, physics);
 	}
 
