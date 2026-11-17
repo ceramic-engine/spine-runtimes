@@ -219,7 +219,7 @@ class PathConstraint extends Constraint<PathConstraint, PathConstraintData, Path
 	private function computeWorldPositions(skeleton:Skeleton, path:PathAttachment, spacesCount:Int, tangents:Bool):Array<Float> {
 		var position = appliedPose.position;
 		ArrayUtils.resize(positions, spacesCount * 3 + 2, 0);
-		var out:Array<Float> = positions, world = new Array<Float>();
+		var out:Array<Float> = positions, world = this.world;
 		var closed = path.closed;
 		var verticesLength = path.worldVerticesLength,
 			curveCount = Std.int(verticesLength / 6),
