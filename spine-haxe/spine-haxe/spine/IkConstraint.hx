@@ -106,7 +106,8 @@ class IkConstraint extends Constraint<IkConstraint, IkConstraintData, IkConstrai
 		var pa = p.a, pb = p.b, pc = p.c, pd = p.d;
 		var rotationIK = -bone.shearX - bone.rotation, tx = 0., ty = 0.;
 
-		function switchDefault() {
+		// Inlined at each call site: a local function capturing variables would allocate a closure every call
+		inline function switchDefault() {
 			var x = targetX - p.worldX, y = targetY - p.worldY;
 			var d = pa * pd - pb * pc;
 			if (Math.abs(d) <= MathUtils.epsilon) {
