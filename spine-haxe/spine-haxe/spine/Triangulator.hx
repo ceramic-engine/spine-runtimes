@@ -76,6 +76,9 @@ class Triangulator {
 					var p1x:Float = vertices[p1], p1y:Float = vertices[p1 + 1];
 					var p2x:Float = vertices[p2], p2y:Float = vertices[p2 + 1];
 					var p3x:Float = vertices[p3], p3y:Float = vertices[p3 + 1];
+					// The candidate is an ear if no concave vertex is inside its triangle.
+					// Otherwise, the next candidate is tried.
+					var isEar = true;
 					var ii:Int = next + 1 < vertexCount ? next + 1 : 0;
 					while (ii != previous) {
 						if (isConcaveArray[ii]) {
@@ -84,14 +87,17 @@ class Triangulator {
 							var vy:Float = vertices[v + 1];
 							if (positiveArea(p3x, p3y, p1x, p1y, vx, vy)
 								&& positiveArea(p1x, p1y, p2x, p2y, vx, vy)
-								&& positiveArea(p2x, p2y, p3x, p3y, vx, vy))
+								&& positiveArea(p2x, p2y, p3x, p3y, vx, vy)) {
+								isEar = false;
 								break;
+							}
 						}
 						ii++;
 						if (ii == vertexCount)
 							ii = 0;
 					}
-					break;
+					if (isEar)
+						break;
 				}
 
 				if (next == 0) {
