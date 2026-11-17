@@ -1271,9 +1271,9 @@ class SkeletonJson {
 			if (constraint == null)
 				throw new SpineException("Slider not found: " + sliderName);
 			var index = skeletonData.constraints.indexOf(constraint);
-			var timelineMap:Dynamic = Reflect.field(sliders, sliderName);
-			for (timelineName in Reflect.fields(timelineMap)) {
-				timelineMap = Reflect.field(timelineMap, timelineName);
+			var sliderMap:Dynamic = Reflect.field(sliders, sliderName);
+			for (timelineName in Reflect.fields(sliderMap)) {
+				timelineMap = Reflect.field(sliderMap, timelineName);
 				keyMap = timelineMap[0];
 				if (keyMap == null)
 					continue;
@@ -1281,9 +1281,9 @@ class SkeletonJson {
 				var frames = timelineMap.length;
 				switch (timelineName) {
 					case "time":
-						readTimeline(timelines, keyMap, new SliderTimeline(frames, frames, index), 1, 1);
+						readTimeline(timelines, timelineMap, new SliderTimeline(frames, frames, index), 1, 1);
 					case "mix":
-						readTimeline(timelines, keyMap, new SliderMixTimeline(frames, frames, index), 1, 1);
+						readTimeline(timelines, timelineMap, new SliderMixTimeline(frames, frames, index), 1, 1);
 				}
 			}
 		}
