@@ -30,7 +30,7 @@
 package spine;
 
 class ArrayUtils {
-	public static function resize<T>(array:Array<T>, count:Int, value:T) {
+	public static inline function resize<T>(array:Array<T>, count:Int, value:T) {
 		if (count < 0)
 			count = 0;
 		array.resize(count);
@@ -41,7 +41,7 @@ class ArrayUtils {
 	}
 
 	/** Sets the size of the array, keeping its existing values. New elements are set to the given value. */
-	public static function setSize<T>(array:Array<T>, count:Int, value:T) {
+	public static inline function setSize<T>(array:Array<T>, count:Int, value:T) {
 		if (count < 0)
 			count = 0;
 		var previous = array.length;
