@@ -209,13 +209,20 @@ class Skin {
 
 	/** Attach each attachment in this skin if the corresponding attachment in the old skin is currently attached. */
 	public function attachAll(skeleton:Skeleton, oldSkin:Skin):Void {
-		var oldEntries = oldSkin.getAttachments();
-		for (entry in oldEntries) {
-			var slot = skeleton.slots[entry.slotIndex].pose;
-			if (slot.attachment == entry.attachment) {
-				var attachment = getAttachment(entry.slotIndex, entry.placeholder);
-				if (attachment != null)
-					slot.attachment = attachment;
+		// Same order as getAttachments(), without creating the entries
+		var oldAttachments = oldSkin.attachments;
+		for (slotIndex in 0...oldAttachments.length) {
+			var dictionary:StringMap<Attachment> = oldAttachments[slotIndex];
+			if (dictionary == null)
+				continue;
+			var slot = skeleton.slots[slotIndex].pose;
+			for (placeholder in dictionary.keys()) {
+				var oldAttachment = dictionary.get(placeholder);
+				if (oldAttachment != null && slot.attachment == oldAttachment) {
+					var attachment = getAttachment(slotIndex, placeholder);
+					if (attachment != null)
+						slot.attachment = attachment;
+				}
 			}
 		}
 	}
