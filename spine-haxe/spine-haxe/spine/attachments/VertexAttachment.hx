@@ -29,7 +29,9 @@
 
 package spine.attachments;
 
+import spine.ArrayUtils;
 import spine.Bone;
+import spine.BonePose;
 import spine.Skeleton;
 import spine.Slot;
 
@@ -71,6 +73,8 @@ class VertexAttachment extends Attachment {
 	 * @param stride The number of `worldVertices` entries between the value pairs written. */
 	public function computeWorldVertices(skeleton:Skeleton, slot:Slot, start:Int, count:Int, worldVertices:Array<Float>, offset:Int, stride:Int):Void {
 		count = offset + (count >> 1) * stride;
+		if (count > offset && worldVertices.length < count - stride + 2)
+			worldVertices.resize(count - stride + 2);
 		var deform:Array<Float> = slot.appliedPose.deform;
 		var vertices = vertices;
 		if (bones == null) {
@@ -81,9 +85,9 @@ class VertexAttachment extends Attachment {
 			var a = bone.a, b = bone.b, c = bone.c, d = bone.d;
 			var v = start, w = offset;
 			while (w < count) {
-				var vx = vertices[v], vy = vertices[v + 1];
-				worldVertices[w] = vx * a + vy * b + x;
-				worldVertices[w + 1] = vx * c + vy * d + y;
+				var vx = ArrayUtils.fastGet(vertices, v), vy = ArrayUtils.fastGet(vertices, v + 1);
+				ArrayUtils.fastSet(worldVertices, w, vx * a + vy * b + x);
+				ArrayUtils.fastSet(worldVertices, w + 1, vx * c + vy * d + y);
 				v += 2;
 				w += stride;
 			}
@@ -91,7 +95,7 @@ class VertexAttachment extends Attachment {
 		}
 		var v = 0, skip = 0, i = 0;
 		while (i < start) {
-			var n = bones[v];
+			var n = ArrayUtils.fastGet(bones, v);
 			v += n + 1;
 			skip += n;
 			i += 2;
@@ -101,41 +105,41 @@ class VertexAttachment extends Attachment {
 			var w = offset, b = skip * 3;
 			while (w < count) {
 				var wx = 0., wy = 0.;
-				var n = bones[v++];
+				var n = ArrayUtils.fastGet(bones, v++);
 				n += v;
 				while (v < n) {
-					var bone = skeletonBones[bones[v]].appliedPose;
-					var vx = vertices[b],
-						vy = vertices[b + 1],
-						weight = vertices[b + 2];
+					var bone = BonePose.applied(skeletonBones[ArrayUtils.fastGet(bones, v)]);
+					var vx = ArrayUtils.fastGet(vertices, b),
+						vy = ArrayUtils.fastGet(vertices, b + 1),
+						weight = ArrayUtils.fastGet(vertices, b + 2);
 					wx += (vx * bone.a + vy * bone.b + bone.worldX) * weight;
 					wy += (vx * bone.c + vy * bone.d + bone.worldY) * weight;
 					v++;
 					b += 3;
 				}
-				worldVertices[w] = wx;
-				worldVertices[w + 1] = wy;
+				ArrayUtils.fastSet(worldVertices, w, wx);
+				ArrayUtils.fastSet(worldVertices, w + 1, wy);
 				w += stride;
 			}
 		} else {
 			var w = offset, b = skip * 3, f = skip << 1;
 			while (w < count) {
 				var wx = 0., wy = 0.;
-				var n = bones[v++];
+				var n = ArrayUtils.fastGet(bones, v++);
 				n += v;
 				while (v < n) {
-					var bone = skeletonBones[bones[v]].appliedPose;
-					var vx = vertices[b] + deform[f],
-						vy = vertices[b + 1] + deform[f + 1],
-						weight = vertices[b + 2];
+					var bone = BonePose.applied(skeletonBones[ArrayUtils.fastGet(bones, v)]);
+					var vx = ArrayUtils.fastGet(vertices, b) + ArrayUtils.fastGet(deform, f),
+						vy = ArrayUtils.fastGet(vertices, b + 1) + ArrayUtils.fastGet(deform, f + 1),
+						weight = ArrayUtils.fastGet(vertices, b + 2);
 					wx += (vx * bone.a + vy * bone.b + bone.worldX) * weight;
 					wy += (vx * bone.c + vy * bone.d + bone.worldY) * weight;
 					v++;
 					b += 3;
 					f += 2;
 				}
-				worldVertices[w] = wx;
-				worldVertices[w + 1] = wy;
+				ArrayUtils.fastSet(worldVertices, w, wx);
+				ArrayUtils.fastSet(worldVertices, w + 1, wy);
 				w += stride;
 			}
 		}

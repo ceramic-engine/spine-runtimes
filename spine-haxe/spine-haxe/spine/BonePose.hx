@@ -32,6 +32,17 @@ package spine;
 /** The applied local pose and world transform for a bone. This is the Bone.pose with constraints applied and the world
  * transform computed by Skeleton.updateWorldTransform(Physics) and updateWorldTransform(Skeleton). */
 class BonePose implements Pose<BonePose> implements Update {
+	/** The applied pose of a bone. `Bone.appliedPose` is declared with a type parameter in `Posed`,
+	 * which hxcpp stores as `Dynamic`: reading it through a typed variable is a checked cast.
+	 * In a hot loop, this reads it without the check on C++ (the field always holds a `BonePose`). */
+	public static inline function applied(bone:Bone):BonePose {
+		#if cpp
+		return untyped __cpp__("{0}->appliedPose.StaticCast< ::spine::BonePose >()", bone);
+		#else
+		return bone.appliedPose;
+		#end
+	}
+
 	public var bone:Bone;
 
 	/** The local x translation. */

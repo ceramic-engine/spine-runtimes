@@ -51,4 +51,22 @@ class ArrayUtils {
 		}
 		return array;
 	}
+
+	/** Reads an element without bounds checking on C++. The index must be valid. */
+	public static inline function fastGet<T>(array:Array<T>, index:Int):T {
+		#if cpp
+		return untyped array.__unsafe_get(index);
+		#else
+		return array[index];
+		#end
+	}
+
+	/** Writes an element without bounds checking on C++. The index must be within the array length. */
+	public static inline function fastSet<T>(array:Array<T>, index:Int, value:T):Void {
+		#if cpp
+		untyped array.__unsafe_set(index, value);
+		#else
+		array[index] = value;
+		#end
+	}
 }
