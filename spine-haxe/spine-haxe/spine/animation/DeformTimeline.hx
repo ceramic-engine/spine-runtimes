@@ -196,7 +196,7 @@ class DeformTimeline extends CurveTimeline implements SlotTimeline {
 				return;
 			}
 			var vertexCount = vertices[0].length;
-			ArrayUtils.resize(deform, vertexCount, 0);
+			ArrayUtils.setSize(deform, vertexCount, 0);
 			var vertexAttachment = cast(pose.attachment, VertexAttachment);
 			if (vertexAttachment.bones == null) {
 				var setupVertices = vertexAttachment.vertices;
@@ -223,7 +223,7 @@ class DeformTimeline extends CurveTimeline implements SlotTimeline {
 		if (deform.length == 0)
 			from = MixFrom.setup;
 		var fromSetup = from == MixFrom.setup;
-		ArrayUtils.resize(deform, vertexCount, 0);
+		ArrayUtils.setSize(deform, vertexCount, 0);
 
 		if (v2 == null) { // Time is after last frame.
 			if (alpha == 1) {

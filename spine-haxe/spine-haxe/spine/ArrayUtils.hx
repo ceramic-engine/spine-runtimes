@@ -39,4 +39,16 @@ class ArrayUtils {
 		}
 		return array;
 	}
+
+	/** Sets the size of the array, keeping its existing values. New elements are set to the given value. */
+	public static function setSize<T>(array:Array<T>, count:Int, value:T) {
+		if (count < 0)
+			count = 0;
+		var previous = array.length;
+		array.resize(count);
+		for (i in previous...count) {
+			array[i] = value;
+		}
+		return array;
+	}
 }
