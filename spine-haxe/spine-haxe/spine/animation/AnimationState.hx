@@ -68,7 +68,10 @@ class AnimationState {
 	public var onEvent:EventListeners = new EventListeners();
 
 	private var queue:EventQueue;
-	private var propertyIDs:StringMap<TrackEntry> = new StringMap<TrackEntry>();
+	/** Owner of each property ID while computing hold modes. Entries are kept from one computation to the next and are only
+	 * valid for the current propertyGeneration, so that clearing the map does not allocate all entries again. */
+	private var propertyIDs:StringMap<PropertyOwner> = new StringMap<PropertyOwner>();
+	private var propertyGeneration:Int = 0;
 
 	public var animationsChanged:Bool = false;
 	public var timeScale:Float = 1;
@@ -842,7 +845,7 @@ class AnimationState {
 				entry = entry.mixingTo;
 			} while (entry != null);
 		}
-		propertyIDs.clear();
+		propertyGeneration++;
 	}
 
 	private function computeHold(entry:TrackEntry, track:TrackEntry):Void {
@@ -887,18 +890,33 @@ class AnimationState {
 		}
 	}
 
+	private inline function getPropertyOwner(id:String):TrackEntry {
+		var owner = propertyIDs.get(id);
+		return owner != null && owner.generation == propertyGeneration ? owner.track : null;
+	}
+
+	private inline function setPropertyOwner(id:String, track:TrackEntry):Void {
+		var owner = propertyIDs.get(id);
+		if (owner == null) {
+			owner = new PropertyOwner();
+			propertyIDs.set(id, owner);
+		}
+		owner.track = track;
+		owner.generation = propertyGeneration;
+	}
+
 	private function getFrom(track:TrackEntry, timeline:Timeline, ids:Array<String>):Int {
 		var from = SETUP;
 		var i = 0, n = ids.length;
 		while (i < n) {
-			var owner = propertyIDs.get(ids[i]);
+			var owner = getPropertyOwner(ids[i]);
 			if (owner == null) {
-				propertyIDs.set(ids[i], track);
+				setPropertyOwner(ids[i], track);
 			} else {
 				if (owner != track) {
 					while (++i < n)
-						if (!propertyIDs.exists(ids[i]))
-							propertyIDs.set(ids[i], track);
+						if (getPropertyOwner(ids[i]) == null)
+							setPropertyOwner(ids[i], track);
 					return CURRENT;
 				}
 				from = FIRST;
@@ -906,7 +924,7 @@ class AnimationState {
 			i++;
 		}
 		if (Std.isOfType(timeline, DrawOrderFolderTimeline)) {
-			var first = propertyIDs.get(DrawOrderTimeline.propertyID);
+			var first = getPropertyOwner(DrawOrderTimeline.propertyID);
 			if (first != null)
 				return first != track ? CURRENT : FIRST;
 		}
@@ -978,4 +996,11 @@ class StringSet {
 		entries = new StringMap<Bool>();
 		size = 0;
 	}
+}
+
+private class PropertyOwner {
+	public var track:TrackEntry = null;
+	public var generation:Int = 0;
+
+	public function new() {}
 }
