@@ -106,7 +106,7 @@ class SkeletonJson {
 		var skeletonData:SkeletonData = new SkeletonData();
 
 		// Skeleton.
-		var skeletonMap = getString(root, "skeleton", "");
+		var skeletonMap:Dynamic = Reflect.getProperty(root, "skeleton");
 		if (skeletonMap != null) {
 			skeletonData.hash = getString(skeletonMap, "hash", "");
 			skeletonData.version = getString(skeletonMap, "spine", "");
@@ -115,7 +115,7 @@ class SkeletonJson {
 			skeletonData.width = getFloat(skeletonMap, "width");
 			skeletonData.height = getFloat(skeletonMap, "height");
 			skeletonData.referenceScale = getFloat(skeletonMap, "referenceScale", 100) * scale;
-			skeletonData.fps = getFloat(skeletonMap, "fps");
+			skeletonData.fps = getFloat(skeletonMap, "fps", 30);
 			skeletonData.imagesPath = getString(skeletonMap, "images", "");
 			skeletonData.audioPath = getString(skeletonMap, "audio", "");
 		}
