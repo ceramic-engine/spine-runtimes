@@ -80,7 +80,7 @@ class SlotPose implements Pose<SlotPose> {
 		if (!Std.isOfType(attachmentNew, VertexAttachment)
 			|| !Std.isOfType(attachment, VertexAttachment)
 			|| cast(attachmentNew, VertexAttachment).timelineAttachment != cast(attachment, VertexAttachment).timelineAttachment) {
-			deform = new Array<Float>();
+			deform.resize(0);
 		}
 		attachment = attachmentNew;
 		sequenceIndex = -1;
