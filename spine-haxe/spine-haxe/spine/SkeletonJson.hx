@@ -181,7 +181,7 @@ class SkeletonJson {
 		if (Reflect.hasField(root, "constraints")) {
 			for (constraintMap in cast(Reflect.getProperty(root, "constraints"), Array<Dynamic>)) {
 				var name:String = Reflect.getProperty(constraintMap, "name");
-				var skinRequired:Bool = Reflect.getProperty(constraintMap, "skinRequired");
+				var skinRequired:Bool = Reflect.hasField(constraintMap, "skin") ? cast(Reflect.getProperty(constraintMap, "skin"), Bool) : false;
 				var type:String = Reflect.getProperty(constraintMap, "type");
 				switch (type) {
 					case "ik":
