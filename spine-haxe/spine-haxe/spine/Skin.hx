@@ -47,6 +47,10 @@ class Skin {
 	public final bones:Array<BoneData> = new Array<BoneData>();
 	public final constraints = new Array<ConstraintData<Dynamic, Dynamic>>();
 
+	/** The entries of this skin, in the order of getAttachments(), when the skin is attached in place of another one
+	 * (attachAll). Built when needed and kept until setAttachment(), removeAttachment() or clear() changes the skin. */
+	private var attachAllEntries:Array<SkinEntry> = null;
+
 	/** The color of the skin as it was in Spine, or a default color if nonessential data was not exported. */
 	public final color:Color = new Color(0.99607843, 0.61960787, 0.30980393, 1); // fe9e4fff
 
@@ -65,6 +69,7 @@ class Skin {
 		if (attachments[slotIndex] == null)
 			attachments[slotIndex] = new StringMap<Attachment>();
 		attachments[slotIndex].set(placeholder, attachment);
+		attachAllEntries = null;
 	}
 
 	/** Adds all attachments, bones, and constraints from the specified skin to this skin. */
@@ -164,6 +169,7 @@ class Skin {
 		var dictionary:StringMap<Attachment> = attachments[slotIndex];
 		if (dictionary != null)
 			dictionary.remove(placeholder);
+		attachAllEntries = null;
 	}
 
 	/** Returns all attachments in this skin. */
@@ -199,6 +205,7 @@ class Skin {
 	/** Clears all attachments, bones, and constraints. */
 	public function clear():Void {
 		attachments.resize(0);
+		attachAllEntries = null;
 		bones.resize(0);
 		constraints.resize(0);
 	}
@@ -209,20 +216,18 @@ class Skin {
 
 	/** Attach each attachment in this skin if the corresponding attachment in the old skin is currently attached. */
 	public function attachAll(skeleton:Skeleton, oldSkin:Skin):Void {
-		// Same order as getAttachments(), without creating the entries
-		var oldAttachments = oldSkin.attachments;
-		for (slotIndex in 0...oldAttachments.length) {
-			var dictionary:StringMap<Attachment> = oldAttachments[slotIndex];
-			if (dictionary == null)
-				continue;
-			var slot = skeleton.slots[slotIndex].pose;
-			for (placeholder in dictionary.keys()) {
-				var oldAttachment = dictionary.get(placeholder);
-				if (oldAttachment != null && slot.attachment == oldAttachment) {
-					var attachment = getAttachment(slotIndex, placeholder);
-					if (attachment != null)
-						slot.attachment = attachment;
-				}
+		// The entries of the old skin are kept between skin changes, like the ordered entries of the Java runtime
+		var oldEntries = oldSkin.attachAllEntries;
+		if (oldEntries == null) {
+			oldEntries = oldSkin.getAttachments();
+			oldSkin.attachAllEntries = oldEntries;
+		}
+		for (entry in oldEntries) {
+			var slot = skeleton.slots[entry.slotIndex].pose;
+			if (slot.attachment == entry.attachment) {
+				var attachment = getAttachment(entry.slotIndex, entry.placeholder);
+				if (attachment != null)
+					slot.attachment = attachment;
 			}
 		}
 	}
