@@ -35,7 +35,9 @@ import spine.SkeletonData;
 /** Stores mix (crossfade) durations to be applied when spine.animation.AnimationState animations are changed. */
 class AnimationStateData {
 	private var _skeletonData:SkeletonData;
-	private var animationToMixTime:StringMap<Float> = new StringMap<Float>();
+	/** Mix durations by name of the animation mixed from, then by name of the animation mixed to. Two levels of maps
+	 * instead of a concatenated key: looking up a mix duration does not build a string. */
+	private var animationToMixTime:StringMap<StringMap<Float>> = new StringMap<StringMap<Float>>();
 
 	/** The mix duration to use when no mix duration has been defined between two animations. */
 	public var defaultMix:Float = 0;
@@ -72,15 +74,23 @@ class AnimationStateData {
 			throw new SpineException("from cannot be null.");
 		if (to == null)
 			throw new SpineException("to cannot be null.");
-		animationToMixTime.set(from.name + ":" + to.name, duration);
+		var toMixTime = animationToMixTime.get(from.name);
+		if (toMixTime == null) {
+			toMixTime = new StringMap<Float>();
+			animationToMixTime.set(from.name, toMixTime);
+		}
+		toMixTime.set(to.name, duration);
 	}
 
 	/** Returns the mix duration to use when changing from the specified animation to the other, or the AnimationStateData.defaultMix if
 	 * no mix duration has been set. */
 	public function getMix(from:Animation, to:Animation):Float {
-		if (animationToMixTime.exists(from.name + ":" + to.name))
-			return animationToMixTime.get(from.name + ":" + to.name);
-		else
-			return defaultMix;
+		var toMixTime = animationToMixTime.get(from.name);
+		if (toMixTime != null) {
+			var duration:Null<Float> = toMixTime.get(to.name);
+			if (duration != null)
+				return duration;
+		}
+		return defaultMix;
 	}
 }
